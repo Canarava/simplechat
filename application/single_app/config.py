@@ -25,6 +25,7 @@ import ffmpeg as ffmpeg_py
 import glob
 import jwt
 import pandas
+from httpx import Timeout
 
 # Add dotenv import
 from dotenv import load_dotenv
@@ -119,13 +120,25 @@ HSTS_MAX_AGE = int(os.getenv('HSTS_MAX_AGE', '31536000'))  # 1 year default
 CLIENTS = {}
 CLIENTS_LOCK = threading.Lock()
 
-ALLOWED_EXTENSIONS = {
-    'txt', 'pdf', 'docx', 'xlsx', 'xls', 'csv', 'pptx', 'html', 'jpg', 'jpeg', 'png', 'bmp', 'tiff', 'tif', 'heif', 'md', 'json', 
-    'mp4', 'mov', 'avi', 'mkv', 'flv', 'mxf', 'gxf', 'ts', 'ps', '3gp', '3gpp', 'mpg', 'wmv', 'asf', 'm4a', 'm4v', 'isma', 'ismv', 
-    'dvr-ms', 'wav'
-}
 ALLOWED_EXTENSIONS_IMG = {'png', 'jpg', 'jpeg'}
+
+AUDIO_FILE_EXTENSIONS = {
+    'aac', 'aif', 'aiff', 'alac', 'amr', 'ape', 'au', 'flac', 'm4a', 'm4b', 'm4p', 'mp2', 'mp3', 'ogg', 'oga', 'opus', 'ra',
+    'snd', 'tta', 'wav', 'wave', 'weba', 'wma', 'wv'
+}
+
+VIDEO_FILE_EXTENSIONS = {
+    '3gp', '3gpp', 'amv', 'asf', 'avi', 'dvr-ms', 'flv', 'gxf', 'ismv', 'isma', 'm2t', 'm2ts', 'm4v', 'mkv', 'mov',
+    'mp4', 'mpg', 'mpeg', 'mxf', 'mts', 'rm', 'ts', 'vob', 'webm', 'wmv'
+}
+
+BASE_DOCUMENT_EXTENSIONS = {'txt', 'pdf', 'docx', 'xlsx', 'xls', 'csv', 'pptx', 'html', 'jpg', 'jpeg', 'png', 'bmp', 'tiff', 'tif', 'heif', 'md', 'json'}
+
+ALLOWED_EXTENSIONS = BASE_DOCUMENT_EXTENSIONS | AUDIO_FILE_EXTENSIONS | VIDEO_FILE_EXTENSIONS
 MAX_CONTENT_LENGTH = 5000 * 1024 * 1024  # 5000 MB AKA 5 GB
+
+OPENAI_TIMEOUT_SECONDS = int(os.getenv('OPENAI_TIMEOUT_SECONDS', '45'))
+OPENAI_TIMEOUT = Timeout(timeout=OPENAI_TIMEOUT_SECONDS)
 
 # Add Support for Custom Azure Environments
 CUSTOM_GRAPH_URL_VALUE = os.getenv("CUSTOM_GRAPH_URL_VALUE", "")

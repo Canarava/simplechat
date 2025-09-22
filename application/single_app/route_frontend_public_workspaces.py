@@ -59,17 +59,6 @@ def register_route_frontend_public_workspaces(app):
         enable_video_file_support = settings.get('enable_video_file_support', False)
         enable_audio_file_support = settings.get('enable_audio_file_support', False)
 
-        # Build allowed extensions string as in workspace.html
-        allowed_extensions = [
-            "txt", "pdf", "docx", "xlsx", "xls", "csv", "pptx", "html",
-            "jpg", "jpeg", "png", "bmp", "tiff", "tif", "heif", "md", "json"
-        ]
-        if enable_video_file_support in [True, 'True', 'true']:
-            allowed_extensions += ["mp4", "mov", "avi", "wmv", "mkv", "webm"]
-        if enable_audio_file_support in [True, 'True', 'true']:
-            allowed_extensions += ["mp3", "wav", "ogg", "aac", "flac", "m4a"]
-        allowed_extensions_str = "Allowed: " + ", ".join(allowed_extensions)
-
         return render_template(
             'public_workspaces.html',
             settings=public_settings,
@@ -78,7 +67,9 @@ def register_route_frontend_public_workspaces(app):
             enable_extract_meta_data=enable_extract_meta_data,
             enable_video_file_support=enable_video_file_support,
             enable_audio_file_support=enable_audio_file_support,
-            allowed_extensions=allowed_extensions_str
+            base_document_extensions=sorted(BASE_DOCUMENT_EXTENSIONS),
+            audio_extensions=sorted(AUDIO_FILE_EXTENSIONS),
+            video_extensions=sorted(VIDEO_FILE_EXTENSIONS)
         )
 
     @app.route("/public_directory", methods=["GET"])

@@ -59,6 +59,13 @@
           </a>
           {% endif %}
         </li>
+        {% if app_settings.enable_audio_file_support %}
+        <li class="nav-item">
+          <a class="nav-link {% if request.endpoint == 'transcripts' %}active{% endif %}" href="{{ url_for('transcripts') }}">
+            <i class="bi bi-soundwave me-2"></i><span class="nav-text">Transcripts</span>
+          </a>
+        </li>
+        {% endif %}
       {% endif %}
     </ul>
 

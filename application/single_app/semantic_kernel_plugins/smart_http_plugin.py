@@ -560,6 +560,7 @@ class SmartHttpPlugin:
             from functions_settings import get_settings
             from openai import AzureOpenAI
             from azure.identity import DefaultAzureCredential, get_bearer_token_provider
+            from config import OPENAI_TIMEOUT
             
             settings = get_settings()
             
@@ -576,7 +577,8 @@ class SmartHttpPlugin:
                 gpt_client = AzureOpenAI(
                     api_version=settings.get('azure_apim_gpt_api_version'),
                     azure_endpoint=settings.get('azure_apim_gpt_endpoint'),
-                    api_key=settings.get('azure_apim_gpt_subscription_key')
+                    api_key=settings.get('azure_apim_gpt_subscription_key'),
+                    timeout=OPENAI_TIMEOUT
                 )
             else:
                 if settings.get('azure_openai_gpt_authentication_type') == 'managed_identity':
@@ -588,13 +590,15 @@ class SmartHttpPlugin:
                     gpt_client = AzureOpenAI(
                         api_version=settings.get('azure_openai_gpt_api_version'),
                         azure_endpoint=settings.get('azure_openai_gpt_endpoint'),
-                        azure_ad_token_provider=token_provider
+                        azure_ad_token_provider=token_provider,
+                        timeout=OPENAI_TIMEOUT
                     )
                 else:
                     gpt_client = AzureOpenAI(
                         api_version=settings.get('azure_openai_gpt_api_version'),
                         azure_endpoint=settings.get('azure_openai_gpt_endpoint'),
-                        api_key=settings.get('azure_openai_gpt_key')
+                        api_key=settings.get('azure_openai_gpt_key'),
+                        timeout=OPENAI_TIMEOUT
                     )
             
             # Chunk the content into manageable pieces (about 100k chars each)
@@ -632,7 +636,8 @@ class SmartHttpPlugin:
                         model=gpt_model,
                         messages=messages,
                         max_tokens=2500,  # Increased for more comprehensive summaries
-                        temperature=0.3   # Low temperature for consistent summarization
+                        temperature=0.3,  # Low temperature for consistent summarization
+                        timeout=OPENAI_TIMEOUT
                     )
                     
                     chunk_summary = response.choices[0].message.content.strip()
@@ -672,7 +677,8 @@ class SmartHttpPlugin:
                         model=gpt_model,
                         messages=messages,
                         max_tokens=4000,  # More space for executive summary
-                        temperature=0.3
+                        temperature=0.3,
+                        timeout=OPENAI_TIMEOUT
                     )
                     
                     executive_summary = response.choices[0].message.content.strip()

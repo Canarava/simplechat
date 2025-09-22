@@ -139,7 +139,8 @@ def register_route_backend_chats(app):
                     gpt_client = AzureOpenAI(
                         api_version=settings.get('azure_apim_gpt_api_version'),
                         azure_endpoint=settings.get('azure_apim_gpt_endpoint'),
-                        api_key=settings.get('azure_apim_gpt_subscription_key')
+                        api_key=settings.get('azure_apim_gpt_subscription_key'),
+                        timeout=OPENAI_TIMEOUT
                     )
                 else:
                     auth_type = settings.get('azure_openai_gpt_authentication_type')
@@ -167,7 +168,8 @@ def register_route_backend_chats(app):
                         gpt_client = AzureOpenAI(
                             api_version=api_version,
                             azure_endpoint=endpoint,
-                            azure_ad_token_provider=token_provider
+                            azure_ad_token_provider=token_provider,
+                            timeout=OPENAI_TIMEOUT
                         )
                     else: # Default to API Key
                         api_key = settings.get('azure_openai_gpt_key')
@@ -175,7 +177,8 @@ def register_route_backend_chats(app):
                         gpt_client = AzureOpenAI(
                             api_version=api_version,
                             azure_endpoint=endpoint,
-                            api_key=api_key
+                            api_key=api_key,
+                            timeout=OPENAI_TIMEOUT
                         )
 
                 if not gpt_client or not gpt_model:
@@ -561,7 +564,8 @@ def register_route_backend_chats(app):
                                 summary_response_search = gpt_client.chat.completions.create(
                                     model=gpt_model,
                                     messages=[{"role": "system", "content": summary_prompt_search}],
-                                    max_tokens=100 # Keep summary short
+                                    max_tokens=100,  # Keep summary short
+                                    timeout=OPENAI_TIMEOUT
                                 )
                                 summary_for_search = summary_response_search.choices[0].message.content.strip()
                                 if summary_for_search:
@@ -777,7 +781,8 @@ def register_route_backend_chats(app):
                     image_gen_client = AzureOpenAI(
                         api_version=settings.get('azure_apim_image_gen_api_version'),
                         azure_endpoint=settings.get('azure_apim_image_gen_endpoint'),
-                        api_key=settings.get('azure_apim_image_gen_subscription_key')
+                        api_key=settings.get('azure_apim_image_gen_subscription_key'),
+                        timeout=OPENAI_TIMEOUT
                     )
                 else:
                     if (settings.get('azure_openai_image_gen_authentication_type') == 'managed_identity'):
@@ -785,7 +790,8 @@ def register_route_backend_chats(app):
                         image_gen_client = AzureOpenAI(
                             api_version=settings.get('azure_openai_image_gen_api_version'),
                             azure_endpoint=settings.get('azure_openai_image_gen_endpoint'),
-                            azure_ad_token_provider=token_provider
+                            azure_ad_token_provider=token_provider,
+                            timeout=OPENAI_TIMEOUT
                         )
                         image_gen_model_obj = settings.get('image_gen_model', {})
 
@@ -796,7 +802,8 @@ def register_route_backend_chats(app):
                         image_gen_client = AzureOpenAI(
                             api_version=settings.get('azure_openai_image_gen_api_version'),
                             azure_endpoint=settings.get('azure_openai_image_gen_endpoint'),
-                            api_key=settings.get('azure_openai_image_gen_key')
+                            api_key=settings.get('azure_openai_image_gen_key'),
+                            timeout=OPENAI_TIMEOUT
                         )
                         image_gen_obj = settings.get('image_gen_model', {})
                         if image_gen_obj and image_gen_obj.get('selected'):
@@ -1050,7 +1057,8 @@ def register_route_backend_chats(app):
                                 model=gpt_model,
                                 messages=[{"role": "system", "content": summary_prompt_older}],
                                 max_tokens=150, # Adjust token limit for summary
-                                temperature=0.3 # Lower temp for factual summary
+                                temperature=0.3, # Lower temp for factual summary
+                                timeout=OPENAI_TIMEOUT
                             )
                             summary_of_older = summary_response_older.choices[0].message.content.strip()
                             print(f"Generated summary: {summary_of_older}")
@@ -1628,6 +1636,7 @@ def register_route_backend_chats(app):
                 response = gpt_client.chat.completions.create(
                     model=gpt_model,
                     messages=conversation_history_for_api,
+                    timeout=OPENAI_TIMEOUT
                 )
                 msg = response.choices[0].message.content
                 notice = None

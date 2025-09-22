@@ -324,7 +324,8 @@ def generate_embedding(
         embedding_client = AzureOpenAI(
             api_version = settings.get('azure_apim_embedding_api_version'),
             azure_endpoint = settings.get('azure_apim_embedding_endpoint'),
-            api_key=settings.get('azure_apim_embedding_subscription_key'))
+            api_key=settings.get('azure_apim_embedding_subscription_key'),
+            timeout=OPENAI_TIMEOUT)
     else:
         if (settings.get('azure_openai_embedding_authentication_type') == 'managed_identity'):
             token_provider = get_bearer_token_provider(DefaultAzureCredential(), cognitive_services_scope)
@@ -332,7 +333,8 @@ def generate_embedding(
             embedding_client = AzureOpenAI(
                 api_version=settings.get('azure_openai_embedding_api_version'),
                 azure_endpoint=settings.get('azure_openai_embedding_endpoint'),
-                azure_ad_token_provider=token_provider
+                azure_ad_token_provider=token_provider,
+                timeout=OPENAI_TIMEOUT
             )
         
             embedding_model_obj = settings.get('embedding_model', {})
@@ -343,7 +345,8 @@ def generate_embedding(
             embedding_client = AzureOpenAI(
                 api_version=settings.get('azure_openai_embedding_api_version'),
                 azure_endpoint=settings.get('azure_openai_embedding_endpoint'),
-                api_key=settings.get('azure_openai_embedding_key')
+                api_key=settings.get('azure_openai_embedding_key'),
+                timeout=OPENAI_TIMEOUT
             )
             
             embedding_model_obj = settings.get('embedding_model', {})
@@ -358,7 +361,8 @@ def generate_embedding(
         try:
             response = embedding_client.embeddings.create(
                 model=embedding_model,
-                input=text
+                input=text,
+                timeout=OPENAI_TIMEOUT
             )
 
             embedding = response.data[0].embedding

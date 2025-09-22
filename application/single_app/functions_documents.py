@@ -2253,7 +2253,8 @@ def extract_document_metadata(document_id, user_id, group_id=None, public_worksp
         gpt_client = AzureOpenAI(
             api_version=settings.get('azure_apim_gpt_api_version'),
             azure_endpoint=settings.get('azure_apim_gpt_endpoint'),
-            api_key=settings.get('azure_apim_gpt_subscription_key')
+            api_key=settings.get('azure_apim_gpt_subscription_key'),
+            timeout=OPENAI_TIMEOUT
         )
     else:
         # Standard Azure OpenAI approach
@@ -2265,13 +2266,15 @@ def extract_document_metadata(document_id, user_id, group_id=None, public_worksp
             gpt_client = AzureOpenAI(
                 api_version=settings.get('azure_openai_gpt_api_version'),
                 azure_endpoint=settings.get('azure_openai_gpt_endpoint'),
-                azure_ad_token_provider=token_provider
+                azure_ad_token_provider=token_provider,
+                timeout=OPENAI_TIMEOUT
             )
         else:
             gpt_client = AzureOpenAI(
                 api_version=settings.get('azure_openai_gpt_api_version'),
                 azure_endpoint=settings.get('azure_openai_gpt_endpoint'),
-                api_key=settings.get('azure_openai_gpt_key')
+                api_key=settings.get('azure_openai_gpt_key'),
+                timeout=OPENAI_TIMEOUT
             )
 
     # --- Step 6: GPT Prompt and JSON Parsing ---
@@ -2300,8 +2303,9 @@ def extract_document_metadata(document_id, user_id, group_id=None, public_worksp
         ]
 
         response = gpt_client.chat.completions.create(
-            model=gpt_model, 
-            messages=messages
+            model=gpt_model,
+            messages=messages,
+            timeout=OPENAI_TIMEOUT
         )
         
     except Exception as e:
@@ -3421,26 +3425,55 @@ def _split_audio_file(input_path: str, chunk_seconds: int = 540) -> List[str]:
     Each chunk is re-encoded to PCM WAV (16kHz) for compatibility.
     """
     base, _ = os.path.splitext(input_path)
+    normalized_path = f"{base}_normalized.wav"
     pattern = f"{base}_chunk_%03d.wav"
 
+    # Always normalize the source into 16kHz mono PCM WAV before segmenting.
     try:
         (
             ffmpeg_py
             .input(input_path)
             .output(
+                normalized_path,
+                acodec='pcm_s16le',
+                ar='16000',
+                ac=1,
+                vn=None
+            )
+            .overwrite_output()
+            .run(quiet=True)
+        )
+    except Exception as e:
+        print(f"[Error] FFmpeg normalization to WAV failed for '{input_path}': {e}")
+        raise RuntimeError(f"Normalization failed: {e}")
+
+    try:
+        (
+            ffmpeg_py
+            .input(normalized_path)
+            .output(
                 pattern,
                 acodec='pcm_s16le',
                 ar='16000',
+                ac=1,
                 f='segment',
                 segment_time=chunk_seconds,
                 reset_timestamps=1,
                 map='0'
             )
-            .run(quiet=True, overwrite_output=True)
+            .overwrite_output()
+            .run(quiet=True)
         )
     except Exception as e:
-        print(f"[Error] FFmpeg segmentation to WAV failed for '{input_path}': {e}")
+        print(f"[Error] FFmpeg segmentation to WAV failed for '{normalized_path}': {e}")
         raise RuntimeError(f"Segmentation failed: {e}")
+    finally:
+        if os.path.exists(normalized_path):
+            try:
+                os.remove(normalized_path)
+                print(f"[Debug] Removed normalized audio: {normalized_path}")
+            except Exception as cleanup_err:
+                print(f"[Warning] Unable to remove normalized audio '{normalized_path}': {cleanup_err}")
 
     chunks = sorted(glob.glob(f"{base}_chunk_*.wav"))
     if not chunks:
@@ -3461,6 +3494,9 @@ def process_audio_document(
     """Transcribe an audio file via Azure Speech, splitting >10 min into WAV chunks."""
 
     settings = get_settings()
+    if not settings.get("enable_audio_file_support", False):
+        update_callback(status="Audio transcription disabled in settings")
+        return 0
     if settings.get("enable_enhanced_citations", False):
         update_callback(status="Uploading audio for enhanced citations…")
         blob_path = upload_to_blob(
@@ -3589,8 +3625,8 @@ def process_document_upload_background(document_id, user_id, temp_file_path, ori
     enable_extract_meta_data = settings.get('enable_extract_meta_data', False) # Used by DI flow
     max_file_size_bytes = settings.get('max_file_size_mb', 16) * 1024 * 1024
 
-    video_extensions = ('.mp4', '.mov', '.avi', '.mkv', '.flv')
-    audio_extensions = ('.mp3', '.wav', '.ogg', '.aac', '.flac', '.m4a')
+    video_extensions = tuple(f'.{ext}' for ext in VIDEO_FILE_EXTENSIONS)
+    audio_extensions = tuple(f'.{ext}' for ext in AUDIO_FILE_EXTENSIONS)
 
     # --- Define update_document callback wrapper ---
     # This makes it easier to pass the update function to helpers without repeating args

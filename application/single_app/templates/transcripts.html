@@ -1,0 +1,109 @@
+{% extends "base.html" %}
+{% block title %}Transcripts - {{ app_settings.app_title }}{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-4 transcripts-page">
+  <div class="d-flex justify-content-between align-items-start flex-wrap gap-2 mb-4">
+    <div>
+      <h2 class="mb-1">Transcripts</h2>
+      <p class="text-muted mb-0">Upload audio or video recordings and generate transcripts using Azure AI Speech.</p>
+    </div>
+    <div class="text-end small text-muted">
+      {% if speech_service_endpoint %}
+        <div>Speech endpoint: <code>{{ speech_service_endpoint }}</code></div>
+      {% endif %}
+      <div>Locale: {{ speech_service_locale or 'en-US' }}</div>
+    </div>
+  </div>
+
+  {% if not speech_configured %}
+  <div class="alert alert-warning" role="alert">
+    Azure AI Speech credentials are not fully configured. Uploads will queue, but transcription will fail until the endpoint and key are provided in <a href="{{ url_for('admin_settings') }}" class="alert-link">App Settings</a>.
+  </div>
+  {% endif %}
+
+  <form id="transcript-upload-form" class="card shadow-sm mb-4">
+    <div class="card-header fw-semibold">Upload audio</div>
+    <div class="card-body">
+      <div class="mb-3">
+        <label for="transcript-file-input" class="form-label">Select audio or video files</label>
+        <input
+          id="transcript-file-input"
+          name="file"
+          type="file"
+          class="form-control"
+          accept="{{ audio_accept }},.mp4,.mov,.avi,.mkv,.flv,.webm"
+          multiple
+        >
+        <div class="form-text">Supported audio formats: {{ audio_extensions|join(', ') }}. Large files are automatically normalised to 16kHz WAV before transcription.</div>
+      </div>
+      <div class="d-flex align-items-center gap-3">
+        <button type="submit" class="btn btn-primary">Upload &amp; transcribe</button>
+        <span id="transcript-upload-status" class="text-muted small"></span>
+      </div>
+    </div>
+  </form>
+
+  <div class="card shadow-sm">
+    <div class="card-header d-flex justify-content-between align-items-center">
+      <span class="fw-semibold">Recent transcripts</span>
+      <button class="btn btn-outline-secondary btn-sm" id="refresh-transcripts-btn" type="button">
+        <i class="bi bi-arrow-clockwise me-1"></i>Refresh
+      </button>
+    </div>
+    <div class="card-body p-0">
+      <div id="transcripts-error" class="alert alert-danger m-3 d-none"></div>
+      <div id="transcripts-table-wrapper" class="table-responsive">
+        <table class="table table-hover align-middle mb-0" id="transcripts-table">
+          <thead class="table-light">
+            <tr>
+              <th scope="col">File</th>
+              <th scope="col">Status</th>
+              <th scope="col" style="width: 200px;">Progress</th>
+              <th scope="col" style="width: 200px;">Last updated</th>
+              <th scope="col" style="width: 140px;">Actions</th>
+            </tr>
+          </thead>
+          <tbody id="transcripts-table-body">
+            <tr>
+              <td colspan="5" class="text-center text-muted py-4">Loading transcripts…</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      <div id="transcripts-empty-state" class="text-center text-muted py-5 d-none">
+        <div class="mb-2"><i class="bi bi-mic" style="font-size: 2rem;"></i></div>
+        <p class="mb-0">No transcripts yet. Upload an audio file to get started.</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Transcript modal -->
+<div class="modal fade" id="transcriptModal" tabindex="-1" aria-labelledby="transcript-modal-title" aria-hidden="true">
+  <div class="modal-dialog modal-xl modal-dialog-scrollable">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="transcript-modal-title">Transcript</h5>
+        <div class="d-flex gap-2">
+          <button type="button" class="btn btn-outline-secondary btn-sm" id="copy-transcript-btn" disabled>Copy transcript</button>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+      </div>
+      <div class="modal-body">
+        <pre class="mb-0" id="transcript-modal-body" style="white-space: pre-wrap; font-family: var(--bs-font-monospace);"></pre>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+  <script>
+    window.transcriptsConfig = {
+      audioExtensions: {{ audio_extensions|tojson }},
+      speechConfigured: {{ speech_configured|tojson }}
+    };
+  </script>
+  <script src="{{ url_for('static', filename='js/transcripts/transcripts.js') }}" defer></script>
+{% endblock %}

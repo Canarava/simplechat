@@ -90,7 +90,13 @@
               <i class="bi bi-cloud-arrow-up display-4 text-primary mb-2"></i>
               <div class="fw-bold">Drag & drop files here or <span class="text-primary text-decoration-underline">click to browse</span></div>
               <div class="small text-muted mt-1">
-                {{ allowed_extensions }}
+                Allowed: {{ base_document_extensions|join(', ') }}
+                {% if enable_video_file_support in [True, 'True', 'true'] and video_extensions %}
+                  , {{ video_extensions|join(', ') }}
+                {% endif %}
+                {% if enable_audio_file_support in [True, 'True', 'true'] and audio_extensions %}
+                  , {{ audio_extensions|join(', ') }}
+                {% endif %}
               </div>
             </div>
           </div>

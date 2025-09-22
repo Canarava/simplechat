@@ -31,6 +31,7 @@ from route_frontend_conversations import *
 from route_frontend_groups import *
 from route_frontend_group_workspaces import *
 from route_frontend_public_workspaces import *
+from route_frontend_transcripts import *
 from route_frontend_safety import *
 from route_frontend_feedback import *
 
@@ -447,6 +448,7 @@ register_route_frontend_groups(app)
 # ------------------- Group Documents Routes -------------
 register_route_frontend_group_workspaces(app)
 register_route_frontend_public_workspaces(app)
+register_route_frontend_transcripts(app)
 
 # ------------------- Safety Routes ----------------------
 register_route_frontend_safety(app)
@@ -515,4 +517,3 @@ if __name__ == '__main__':
         # Production
         port = int(os.environ.get("PORT", 5000))
         app.run(host="0.0.0.0", port=port, debug=False)
-

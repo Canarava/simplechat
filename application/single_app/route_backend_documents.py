@@ -379,6 +379,142 @@ def register_route_backend_documents(app):
             "needs_legacy_update_check": legacy_count > 0
         }), 200
 
+    @app.route('/api/transcripts', methods=['GET'])
+    @login_required
+    @user_required
+    @enabled_required("enable_user_workspace")
+    def api_get_audio_transcripts():
+        settings = get_settings()
+        if not settings.get('enable_audio_file_support', False):
+            current_app.logger.info('[Transcripts API] Audio support disabled when user %s attempted to list transcripts', get_current_user_id())
+            return jsonify({'error': 'Audio transcription is disabled by an administrator.'}), 400
+
+        user_id = get_current_user_id()
+        if not user_id:
+            current_app.logger.warning('[Transcripts API] Anonymous request rejected')
+            return jsonify({'error': 'User not authenticated'}), 401
+
+        limit = request.args.get('limit', default=100, type=int)
+        limit = max(1, min(limit, 500))
+
+        current_app.logger.debug('[Transcripts API] Listing transcripts for user %s (limit=%s)', user_id, limit)
+
+        audio_suffixes = tuple(f".{ext.lower()}" for ext in AUDIO_FILE_EXTENSIONS)
+
+        query = f"""
+            SELECT *
+            FROM c
+            WHERE (
+                c.user_id = @user_id
+                OR ARRAY_CONTAINS(c.shared_user_ids, @user_id)
+                OR EXISTS(SELECT VALUE s FROM s IN c.shared_user_ids WHERE STARTSWITH(s, @user_id_prefix))
+            )
+            AND c.type = 'document_metadata'
+            ORDER BY c._ts DESC
+            OFFSET 0 LIMIT {limit}
+        """
+        parameters = [
+            {"name": "@user_id", "value": user_id},
+            {"name": "@user_id_prefix", "value": f"{user_id},"}
+        ]
+
+        try:
+            docs = list(cosmos_user_documents_container.query_items(
+                query=query,
+                parameters=parameters,
+                enable_cross_partition_query=True
+            ))
+            current_app.logger.debug('[Transcripts API] Retrieved %s document metadata rows', len(docs))
+        except Exception as e:
+            current_app.logger.exception('[Transcripts API] Error retrieving transcripts for user %s: %s', user_id, e)
+            return jsonify({'error': f'Error retrieving transcripts: {str(e)}'}), 500
+
+        transcripts = []
+        for doc in docs:
+            file_name = (doc.get('file_name') or '').strip()
+            if not file_name:
+                continue
+
+            if not file_name.lower().endswith(audio_suffixes):
+                continue
+
+            transcripts.append({
+                'id': doc.get('id'),
+                'document_id': doc.get('id'),
+                'file_name': file_name,
+                'title': doc.get('title'),
+                'status': doc.get('status'),
+                'percentage_complete': doc.get('percentage_complete', 0),
+                'number_of_pages': doc.get('number_of_pages', 0),
+                'last_updated': doc.get('last_updated'),
+                'owner_id': doc.get('user_id'),
+                'document_classification': doc.get('document_classification'),
+            })
+
+        current_app.logger.debug('[Transcripts API] Returning %s transcript rows for user %s', len(transcripts), user_id)
+
+        return jsonify({
+            'documents': transcripts,
+            'limit': limit,
+            'result_count': len(transcripts)
+        }), 200
+
+    @app.route('/api/transcripts/<document_id>/chunks', methods=['GET'])
+    @login_required
+    @user_required
+    @enabled_required("enable_user_workspace")
+    def api_get_audio_transcript_chunks(document_id):
+        settings = get_settings()
+        if not settings.get('enable_audio_file_support', False):
+            current_app.logger.info('[Transcripts API] Audio support disabled when fetching chunks for %s', document_id)
+            return jsonify({'error': 'Audio transcription is disabled by an administrator.'}), 400
+
+        user_id = get_current_user_id()
+        if not user_id:
+            current_app.logger.warning('[Transcripts API] Anonymous chunk request for %s rejected', document_id)
+            return jsonify({'error': 'User not authenticated'}), 401
+
+        current_app.logger.debug('[Transcripts API] Retrieving transcript chunks for doc=%s user=%s', document_id, user_id)
+
+        metadata = get_document_metadata(document_id=document_id, user_id=user_id)
+        if not metadata:
+            current_app.logger.warning('[Transcripts API] Document %s not found or unauthorized for user %s', document_id, user_id)
+            return jsonify({'error': 'Document not found or access denied'}), 404
+
+        file_name = (metadata.get('file_name') or '').lower()
+        audio_suffixes = tuple(f".{ext.lower()}" for ext in AUDIO_FILE_EXTENSIONS)
+        if not file_name.endswith(audio_suffixes):
+            current_app.logger.warning('[Transcripts API] Document %s is not an audio transcript (file=%s)', document_id, file_name)
+            return jsonify({'error': 'Requested document is not an audio transcript'}), 400
+
+        try:
+            search_results = list(get_all_chunks(document_id=document_id, user_id=user_id))
+            current_app.logger.debug('[Transcripts API] Retrieved %s raw transcript chunks for doc=%s', len(search_results), document_id)
+        except Exception as e:
+            current_app.logger.exception('[Transcripts API] Error retrieving transcript chunks for doc=%s user=%s: %s', document_id, user_id, e)
+            return jsonify({'error': f'Error retrieving transcript chunks: {str(e)}'}), 500
+
+        chunks = []
+        for result in search_results:
+            chunk_sequence = result.get('chunk_sequence') or result.get('page_number') or 0
+            chunks.append({
+                'chunk_id': result.get('id'),
+                'chunk_sequence': chunk_sequence,
+                'page_number': result.get('page_number'),
+                'text': result.get('chunk_text') or '',
+                'upload_date': result.get('upload_date')
+            })
+
+        chunks.sort(key=lambda c: c['chunk_sequence'] or 0)
+
+        current_app.logger.debug('[Transcripts API] Returning %s chunks for doc=%s', len(chunks), document_id)
+
+        return jsonify({
+            'document_id': document_id,
+            'file_name': metadata.get('file_name'),
+            'chunks': chunks
+        }), 200
+
     @app.route('/api/documents/<document_id>', methods=['GET'])
     @login_required
     @user_required

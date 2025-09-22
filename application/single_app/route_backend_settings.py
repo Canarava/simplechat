@@ -326,7 +326,8 @@ def _test_gpt_connection(payload):
         gpt_client = AzureOpenAI(
             api_version=api_version,
             azure_endpoint=endpoint,
-            api_key=subscription_key
+            api_key=subscription_key,
+            timeout=OPENAI_TIMEOUT
         )
     else:
         direct_data = payload.get('direct', {})
@@ -340,7 +341,8 @@ def _test_gpt_connection(payload):
             gpt_client = AzureOpenAI(
                 api_version=api_version,
                 azure_endpoint=endpoint,
-                azure_ad_token_provider=token_provider
+                azure_ad_token_provider=token_provider,
+                timeout=OPENAI_TIMEOUT
             )
         else:
             key = direct_data.get('key')
@@ -348,13 +350,15 @@ def _test_gpt_connection(payload):
             gpt_client = AzureOpenAI(
                 api_version=api_version,
                 azure_endpoint=endpoint,
-                api_key=key
+                api_key=key,
+                timeout=OPENAI_TIMEOUT
             )
 
     try:
         response = gpt_client.chat.completions.create(
             model=gpt_model,
-            messages=[system_message]
+            messages=[system_message],
+            timeout=OPENAI_TIMEOUT
         )
         if response:
             return jsonify({'message': 'GPT connection successful'}), 200
@@ -426,7 +430,8 @@ def _test_embedding_connection(payload):
         embedding_client = AzureOpenAI(
             api_version=api_version,
             azure_endpoint=endpoint,
-            api_key=subscription_key
+            api_key=subscription_key,
+            timeout=OPENAI_TIMEOUT
         )
     else:
         direct_data = payload.get('direct', {})
@@ -440,7 +445,8 @@ def _test_embedding_connection(payload):
             embedding_client = AzureOpenAI(
                 api_version=api_version,
                 azure_endpoint=endpoint,
-                azure_ad_token_provider=token_provider
+                azure_ad_token_provider=token_provider,
+                timeout=OPENAI_TIMEOUT
             )
         else:
             key = direct_data.get('key')
@@ -448,12 +454,14 @@ def _test_embedding_connection(payload):
             embedding_client = AzureOpenAI(
                 api_version=api_version,
                 azure_endpoint=endpoint,
-                api_key=key
+                api_key=key,
+                timeout=OPENAI_TIMEOUT
             )
     try:
         response = embedding_client.embeddings.create(
             model=embedding_model,
-            input=text
+            input=text,
+            timeout=OPENAI_TIMEOUT
         )
 
         if response:
@@ -479,7 +487,8 @@ def _test_image_gen_connection(payload):
         image_gen_client = AzureOpenAI(
             api_version=api_version,
             azure_endpoint=endpoint,
-            api_key=subscription_key
+            api_key=subscription_key,
+            timeout=OPENAI_TIMEOUT
         )
     else:
         direct_data = payload.get('direct', {})
@@ -493,7 +502,8 @@ def _test_image_gen_connection(payload):
             image_gen_client = AzureOpenAI(
                 api_version=api_version,
                 azure_endpoint=endpoint,
-                azure_ad_token_provider=token_provider
+                azure_ad_token_provider=token_provider,
+                timeout=OPENAI_TIMEOUT
             )
         else:
             key = direct_data.get('key')
@@ -501,7 +511,8 @@ def _test_image_gen_connection(payload):
             image_gen_client = AzureOpenAI(
                 api_version=api_version,
                 azure_endpoint=endpoint,
-                api_key=key
+                api_key=key,
+                timeout=OPENAI_TIMEOUT
             )
     try:
         response = image_gen_client.images.generate(

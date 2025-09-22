@@ -49,7 +49,10 @@ def register_route_frontend_workspace(app):
             enable_video_file_support=enable_video_file_support,
             enable_audio_file_support=enable_audio_file_support,
             enable_file_sharing=enable_file_sharing,
-            legacy_docs_count=legacy_count
+            legacy_docs_count=legacy_count,
+            base_document_extensions=sorted(BASE_DOCUMENT_EXTENSIONS),
+            audio_extensions=sorted(AUDIO_FILE_EXTENSIONS),
+            video_extensions=sorted(VIDEO_FILE_EXTENSIONS)
         )
 
     
