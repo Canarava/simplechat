@@ -1,0 +1,475 @@
+/* application/single_app/static/css/design_system.css */
+
+/* ==========================================================================
+   DESIGN TOKENS & VARIABLES
+   ========================================================================== */
+   :root {
+    /* --- Core Palette --- */
+    
+    /* Indigo - Primary brand and interactive elements */
+    --color-primary-50: #eef2ff;
+    --color-primary-100: #e0e7ff;
+    --color-primary-200: #c7d2fe;
+    --color-primary-300: #a5b4fc;
+    --color-primary-400: #818cf8;
+    --color-primary-500: #6366f1;  /* Primary */
+    --color-primary-600: #4f46e5;
+    --color-primary-700: #4338ca;
+    --color-primary-800: #3730a3;
+    --color-primary-900: #312e81;
+  
+    /* Slate - UI backgrounds, borders, text */
+    --color-neutral-50: #f8fafc;
+    --color-neutral-100: #f1f5f9;
+    --color-neutral-200: #e2e8f0;
+    --color-neutral-300: #cbd5e1;
+    --color-neutral-400: #94a3b8;
+    --color-neutral-500: #64748b;
+    --color-neutral-600: #475569;
+    --color-neutral-700: #334155;
+    --color-neutral-800: #1e293b;
+    --color-neutral-900: #0f172a;
+  
+    /* Semantic Colors */
+    --color-success-50: #f0fdf4;
+    --color-success-500: #22c55e;
+    --color-success-600: #16a34a;
+    --color-success-700: #15803d;
+  
+    --color-warning-50: #fffbeb;
+    --color-warning-500: #f59e0b;
+    --color-warning-600: #d97706;
+    --color-warning-700: #b45309;
+  
+    --color-error-50: #fef2f2;
+    --color-error-500: #ef4444;
+    --color-error-600: #dc2626;
+    --color-error-700: #b91c1c;
+  
+    --color-info-50: #eff6ff;
+    --color-info-500: #3b82f6;
+    --color-info-600: #2563eb;
+    --color-info-700: #1d4ed8;
+  
+    /* --- Typography --- */
+    --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', sans-serif;
+    --font-mono: 'JetBrains Mono', 'Fira Code', 'Consolas', 'Monaco', monospace;
+  
+    --text-xs: 0.75rem;    /* 12px */
+    --text-sm: 0.875rem;   /* 14px */
+    --text-base: 1rem;     /* 16px */
+    --text-lg: 1.125rem;   /* 18px */
+    --text-xl: 1.25rem;    /* 20px */
+    --text-2xl: 1.5rem;    /* 24px */
+    --text-3xl: 1.875rem;  /* 30px */
+    --text-4xl: 2.25rem;   /* 36px */
+  
+    --font-normal: 400;
+    --font-medium: 500;
+    --font-semibold: 600;
+    --font-bold: 700;
+  
+    --leading-tight: 1.25;
+    --leading-snug: 1.375;
+    --leading-normal: 1.5;
+    --leading-relaxed: 1.625;
+  
+    /* --- Spacing --- */
+    --space-0: 0;
+    --space-1: 0.25rem;   /* 4px */
+    --space-2: 0.5rem;    /* 8px */
+    --space-3: 0.75rem;   /* 12px */
+    --space-4: 1rem;      /* 16px */
+    --space-5: 1.25rem;   /* 20px */
+    --space-6: 1.5rem;    /* 24px */
+    --space-8: 2rem;      /* 32px */
+    --space-10: 2.5rem;   /* 40px */
+    --space-12: 3rem;     /* 48px */
+    --space-16: 4rem;     /* 64px */
+    --space-20: 5rem;     /* 80px */
+  
+    /* --- Shadows --- */
+    --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+    --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1);
+    --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1);
+    --shadow-xl: 0 20px 25px -5px rgb(0 0 0 / 0.1);
+  
+    /* --- Layout --- */
+    --container-sm: 640px;
+    --container-md: 768px;
+    --container-lg: 1024px;
+    --container-xl: 1280px;
+  
+    /* --- Bootstrap Overrides (Mapping Variables) --- */
+    --bs-body-font-family: var(--font-sans);
+    --bs-body-font-size: var(--text-base);
+    --bs-body-font-weight: var(--font-normal);
+    --bs-body-line-height: var(--leading-normal);
+    --bs-body-color: var(--color-neutral-700);
+    --bs-body-bg: var(--color-neutral-50);
+  
+    --bs-primary: var(--color-primary-500);
+    --bs-secondary: var(--color-neutral-500);
+    --bs-success: var(--color-success-500);
+    --bs-info: var(--color-info-500);
+    --bs-warning: var(--color-warning-500);
+    --bs-danger: var(--color-error-500);
+    --bs-light: var(--color-neutral-100);
+    --bs-dark: var(--color-neutral-900);
+  
+    --bs-primary-rgb: 99, 102, 241; /* #6366f1 */
+    --bs-link-color: var(--color-primary-600);
+    --bs-link-hover-color: var(--color-primary-700);
+  }
+  
+  /* ==========================================================================
+     GLOBAL RESET & TYPOGRAPHY
+     ========================================================================== */
+  
+  body {
+    background-color: var(--bs-body-bg);
+    color: var(--bs-body-color);
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+  
+  h1, h2, h3, h4, h5, h6, .h1, .h2, .h3, .h4, .h5, .h6 {
+    font-family: var(--font-sans);
+    font-weight: var(--font-semibold);
+    color: var(--color-neutral-900);
+    line-height: var(--leading-tight);
+    margin-bottom: var(--space-4);
+  }
+  
+  h1, .h1 { font-size: var(--text-4xl); }
+  h2, .h2 { font-size: var(--text-3xl); }
+  h3, .h3 { font-size: var(--text-2xl); }
+  h4, .h4 { font-size: var(--text-xl); }
+  
+  small, .small {
+    font-size: var(--text-xs);
+  }
+  
+  code, pre, .font-monospace {
+    font-family: var(--font-mono) !important;
+  }
+  
+  /* ==========================================================================
+     COMPONENTS
+     ========================================================================== */
+  
+  /* --- Buttons --- */
+  .btn {
+    font-family: var(--font-sans);
+    font-weight: var(--font-medium);
+    border-radius: 0.375rem; /* 6px */
+    transition: all 150ms cubic-bezier(0.4, 0, 0.2, 1);
+    box-shadow: none !important; /* Reset Bootstrap shadow on focus for custom ring */
+  }
+  
+  /* Sizes */
+  .btn-sm {
+    padding: 0.5rem 0.75rem;
+    font-size: var(--text-sm);
+    height: 32px;
+    display: inline-flex;
+    align-items: center;
+  }
+  
+  .btn:not(.btn-sm):not(.btn-lg) {
+    padding: 0.625rem 1rem;
+    font-size: var(--text-sm);
+    height: 40px;
+    display: inline-flex;
+    align-items: center;
+  }
+  
+  .btn-lg {
+    padding: 0.75rem 1.5rem;
+    font-size: var(--text-base);
+    height: 48px;
+  }
+  
+  /* Variants */
+  .btn-primary {
+    background-color: var(--color-primary-600);
+    border-color: var(--color-primary-600);
+    color: white;
+  }
+  
+  .btn-primary:hover, .btn-primary:focus {
+    background-color: var(--color-primary-700);
+    border-color: var(--color-primary-700);
+    transform: translateY(-1px);
+  }
+  
+  .btn-secondary { /* Mapping to "Secondary" variant from design spec (white bg) */
+    background-color: white;
+    border-color: var(--color-neutral-300);
+    color: var(--color-neutral-700);
+  }
+  
+  .btn-secondary:hover, .btn-secondary:focus {
+    background-color: var(--color-neutral-50);
+    border-color: var(--color-neutral-300);
+    color: var(--color-neutral-900);
+  }
+  
+  .btn-outline-secondary { /* Mapping for Ghost/Outline */
+    border-color: var(--color-neutral-300);
+    color: var(--color-neutral-700);
+    background: transparent;
+  }
+  
+  .btn-outline-secondary:hover {
+    background-color: var(--color-neutral-100);
+    color: var(--color-neutral-900);
+    border-color: var(--color-neutral-400);
+  }
+  
+  .btn-danger {
+    background-color: var(--color-error-600);
+    border-color: var(--color-error-600);
+  }
+  
+  .btn-danger:hover {
+    background-color: var(--color-error-700);
+    border-color: var(--color-error-700);
+  }
+  /* Ghost button utility */
+  .btn-ghost {
+      background-color: transparent;
+      color: var(--color-neutral-700);
+      border: 1px solid transparent;
+  }
+  .btn-ghost:hover {
+      background-color: var(--color-neutral-100);
+  }
+  
+  /* Focus States */
+  .btn:focus-visible {
+    outline: none;
+    box-shadow: 0 0 0 2px white, 0 0 0 4px var(--color-primary-500) !important;
+  }
+  
+  /* --- Inputs & Forms --- */
+  .form-label {
+    font-size: var(--text-sm);
+    font-weight: var(--font-medium);
+    color: var(--color-neutral-700);
+    margin-bottom: 0.375rem;
+  }
+  
+  .form-control, .form-select {
+    height: 40px;
+    padding: 0 0.75rem;
+    font-size: var(--text-sm);
+    border: 1px solid var(--color-neutral-300);
+    border-radius: 0.375rem;
+    background-color: white;
+    box-shadow: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+    transition: border-color 150ms, box-shadow 150ms;
+  }
+  
+  .form-control:focus, .form-select:focus {
+    border-color: var(--color-primary-500);
+    box-shadow: 0 0 0 0 var(--color-primary-100) !important; /* Reset Bootstrap shadow */
+    outline: 2px solid var(--color-primary-100);
+    outline-offset: 0;
+  }
+  
+  .form-text {
+    font-size: var(--text-xs);
+    color: var(--color-neutral-500);
+    margin-top: 0.375rem;
+  }
+  
+  /* --- Cards --- */
+  .card {
+    background-color: white;
+    border: 1px solid var(--color-neutral-200);
+    border-radius: 0.5rem; /* 8px */
+    box-shadow: var(--shadow-sm);
+    margin-bottom: var(--space-4);
+  }
+  
+  .card-header {
+    background-color: transparent;
+    border-bottom: 1px solid var(--color-neutral-200);
+    padding: var(--space-4) var(--space-6);
+    font-weight: var(--font-semibold);
+    color: var(--color-neutral-900);
+  }
+  
+  .card-body {
+    padding: var(--space-6);
+  }
+  
+  .card-footer {
+    background-color: transparent;
+    border-top: 1px solid var(--color-neutral-200);
+    padding: var(--space-4) var(--space-6);
+  }
+  
+  /* Dashboard Stat Card */
+  .stat-card-value {
+    font-size: 2.25rem;
+    font-weight: var(--font-semibold);
+    line-height: 1;
+    color: var(--color-neutral-900);
+  }
+  
+  .stat-card-label {
+    font-size: var(--text-sm);
+    color: var(--color-neutral-600);
+    margin-top: var(--space-2);
+  }
+  
+  /* --- Tables --- */
+  .table {
+    margin-bottom: 0;
+    font-size: var(--text-sm);
+    color: var(--color-neutral-700);
+  }
+  
+  .table thead th {
+    background-color: var(--color-neutral-50);
+    border-bottom: 1px solid var(--color-neutral-200);
+    font-weight: var(--font-semibold);
+    font-size: var(--text-xs);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--color-neutral-600);
+    padding: 0.75rem 1rem;
+    vertical-align: middle;
+  }
+  
+  .table tbody td {
+    padding: 1rem;
+    vertical-align: middle;
+    border-bottom: 1px solid var(--color-neutral-100);
+    background-color: white;
+  }
+  
+  .table-hover tbody tr:hover td {
+    background-color: var(--color-neutral-50);
+    transition: background-color 100ms;
+  }
+  
+  /* --- Badges --- */
+  .badge {
+    padding: 0.25rem 0.625rem;
+    border-radius: 9999px;
+    font-size: var(--text-xs);
+    font-weight: var(--font-medium);
+    line-height: 1;
+    text-transform: uppercase; /* Optional, makes it look cleaner */
+  }
+  
+  .badge.bg-success {
+    background-color: var(--color-success-50) !important;
+    color: var(--color-success-700) !important;
+  }
+  
+  .badge.bg-warning {
+    background-color: var(--color-warning-50) !important;
+    color: var(--color-warning-700) !important;
+  }
+  
+  .badge.bg-danger {
+    background-color: var(--color-error-50) !important;
+    color: var(--color-error-700) !important;
+  }
+  
+  .badge.bg-info {
+    background-color: var(--color-info-50) !important;
+    color: var(--color-info-700) !important;
+  }
+  
+  .badge.bg-secondary {
+    background-color: var(--color-neutral-100) !important;
+    color: var(--color-neutral-700) !important;
+  }
+  
+  /* --- Modals --- */
+  .modal-content {
+    background-color: white;
+    border: none;
+    border-radius: 0.75rem; /* 12px */
+    box-shadow: var(--shadow-xl);
+  }
+  
+  .modal-header {
+    padding: 1.5rem;
+    border-bottom: 1px solid var(--color-neutral-200);
+    background-color: white; /* Ensure bg is opaque */
+    border-top-left-radius: 0.75rem;
+    border-top-right-radius: 0.75rem;
+  }
+  
+  .modal-title {
+    font-size: var(--text-xl);
+    font-weight: var(--font-semibold);
+  }
+  
+  .modal-body {
+    padding: 1.5rem;
+  }
+  
+  .modal-footer {
+    padding: 1rem 1.5rem;
+    border-top: 1px solid var(--color-neutral-200);
+    background-color: var(--color-neutral-50); /* Optional visual distinction */
+    border-bottom-left-radius: 0.75rem;
+    border-bottom-right-radius: 0.75rem;
+  }
+  
+  .modal-backdrop.show {
+    opacity: 0.5;
+    backdrop-filter: blur(2px);
+  }
+  
+  /* --- Transcripts Viewer --- */
+  .transcript-content {
+      background-color: var(--color-neutral-50);
+      border: 1px solid var(--color-neutral-200);
+      border-radius: 0.5rem;
+      padding: 1.5rem;
+      font-family: var(--font-mono);
+      font-size: var(--text-sm);
+      line-height: var(--leading-relaxed);
+  }
+  
+  
+  /* ==========================================================================
+     LAYOUT & UTILITIES
+     ========================================================================== */
+  
+  /* Top Navbar Overrides */
+  .navbar {
+    background-color: white !important;
+    border-bottom: 1px solid var(--color-neutral-200);
+    padding: 0.5rem 1rem;
+    box-shadow: var(--shadow-sm);
+  }
+  
+  .navbar-brand {
+    font-weight: var(--font-bold);
+    color: var(--color-primary-600) !important;
+  }
+  
+  .nav-link {
+    color: var(--color-neutral-600) !important;
+    font-size: var(--text-sm);
+    font-weight: var(--font-medium);
+  }
+  
+  .nav-link:hover, .nav-link.active {
+    color: var(--color-primary-600) !important;
+  }
+  
+  /* Dark Mode Placeholder Override (To prevent visual breaking until full dark mode is implemented) */
+  /* [data-bs-theme="dark"] body {
+      background-color: var(--color-neutral-900);
+      color: var(--color-neutral-100);
+  } */

@@ -10,7 +10,7 @@
     </div>
     <div class="text-end small text-muted">
       {% if speech_service_endpoint %}
-        <div>Speech endpoint: <code>{{ speech_service_endpoint }}</code></div>
+      <div>Speech endpoint: <code>{{ speech_service_endpoint }}</code></div>
       {% endif %}
       <div>Locale: {{ speech_service_locale or 'en-US' }}</div>
     </div>
@@ -18,7 +18,8 @@
 
   {% if not speech_configured %}
   <div class="alert alert-warning" role="alert">
-    Azure AI Speech credentials are not fully configured. Uploads will queue, but transcription will fail until the endpoint and key are provided in <a href="{{ url_for('admin_settings') }}" class="alert-link">App Settings</a>.
+    Azure AI Speech credentials are not fully configured. Uploads will queue, but transcription will fail until the
+    endpoint and key are provided in <a href="{{ url_for('admin_settings') }}" class="alert-link">App Settings</a>.
   </div>
   {% endif %}
 
@@ -27,15 +28,10 @@
     <div class="card-body">
       <div class="mb-3">
         <label for="transcript-file-input" class="form-label">Select audio or video files</label>
-        <input
-          id="transcript-file-input"
-          name="file"
-          type="file"
-          class="form-control"
-          accept="{{ audio_accept }},.mp4,.mov,.avi,.mkv,.flv,.webm"
-          multiple
-        >
-        <div class="form-text">Supported audio formats: {{ audio_extensions|join(', ') }}. Large files are automatically normalised to 16kHz WAV before transcription.</div>
+        <input id="transcript-file-input" name="file" type="file" class="form-control"
+          accept="{{ audio_accept }},.mp4,.mov,.avi,.mkv,.flv,.webm" multiple>
+        <div class="form-text">Supported audio formats: {{ audio_extensions|join(', ') }}. Large files are automatically
+          normalised to 16kHz WAV before transcription.</div>
       </div>
       <div class="d-flex align-items-center gap-3">
         <button type="submit" class="btn btn-primary">Upload &amp; transcribe</button>
@@ -85,13 +81,17 @@
     <div class="modal-content">
       <div class="modal-header">
         <h5 class="modal-title" id="transcript-modal-title">Transcript</h5>
-        <div class="d-flex gap-2">
-          <button type="button" class="btn btn-outline-secondary btn-sm" id="copy-transcript-btn" disabled>Copy transcript</button>
-          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-        </div>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
       </div>
       <div class="modal-body">
-        <pre class="mb-0" id="transcript-modal-body" style="white-space: pre-wrap; font-family: var(--bs-font-monospace);"></pre>
+        <pre class="mb-0" id="transcript-modal-body"
+          style="white-space: pre-wrap; font-family: var(--bs-font-monospace);"></pre>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+        <button type="button" class="btn btn-primary" id="copy-transcript-btn" disabled>
+          <i class="bi bi-clipboard me-1"></i>Copy transcript
+        </button>
       </div>
     </div>
   </div>
@@ -99,11 +99,11 @@
 {% endblock %}
 
 {% block scripts %}
-  <script>
-    window.transcriptsConfig = {
-      audioExtensions: {{ audio_extensions|tojson }},
-      speechConfigured: {{ speech_configured|tojson }}
+<script>
+  window.transcriptsConfig = {
+    audioExtensions: {{ audio_extensions | tojson }},
+  speechConfigured: { { speech_configured | tojson } }
     };
-  </script>
-  <script src="{{ url_for('static', filename='js/transcripts/transcripts.js') }}" defer></script>
+</script>
+<script src="{{ url_for('static', filename='js/transcripts/transcripts.js') }}" defer></script>
 {% endblock %}

@@ -185,23 +185,75 @@
       }
 
       const data = await response.json();
-      const textBlocks = (data.chunks || []).map((chunk, index) => {
-        const headerParts = [];
-        if (chunk.page_number) headerParts.push(`Segment ${chunk.page_number}`);
-        else headerParts.push(`Segment ${index + 1}`);
-        if (chunk.chunk_sequence && chunk.chunk_sequence !== chunk.page_number) {
-          headerParts.push(`#${chunk.chunk_sequence}`);
-        }
-        return `${headerParts.join(' ')}\n${chunk.text || ''}`.trim();
-      });
-
-      if (!textBlocks.length) {
+      
+      if (!data.chunks || !data.chunks.length) {
         modalBody.textContent = 'Transcript is not available yet. Please try again after processing completes.';
         copyBtn.disabled = true;
         return;
       }
 
-      modalBody.textContent = textBlocks.join('\n\n');
+      // Group consecutive messages by speaker
+      const groupedMessages = [];
+      let currentSpeaker = null;
+      let currentMessages = [];
+
+      data.chunks.forEach((chunk) => {
+        const text = (chunk.text || '').trim();
+        if (!text) return;
+
+        // Try to detect speaker pattern (e.g., "User 1:", "User 2:", "Speaker:", etc.)
+        const speakerMatch = text.match(/^(User \d+|Speaker \d+|Agent|Customer|Interviewer|Interviewee):\s*/i);
+        
+        if (speakerMatch) {
+          // Found a speaker label
+          const speaker = speakerMatch[1];
+          const message = text.substring(speakerMatch[0].length).trim();
+          
+          if (speaker === currentSpeaker) {
+            // Same speaker, append to current messages
+            currentMessages.push(message);
+          } else {
+            // Different speaker, save previous group and start new one
+            if (currentSpeaker && currentMessages.length > 0) {
+              groupedMessages.push({
+                speaker: currentSpeaker,
+                text: currentMessages.join(' ')
+              });
+            }
+            currentSpeaker = speaker;
+            currentMessages = [message];
+          }
+        } else {
+          // No speaker label, treat as continuation of current speaker or standalone
+          if (currentSpeaker) {
+            currentMessages.push(text);
+          } else {
+            // No current speaker, just add as is
+            groupedMessages.push({
+              speaker: null,
+              text: text
+            });
+          }
+        }
+      });
+
+      // Add the last group
+      if (currentSpeaker && currentMessages.length > 0) {
+        groupedMessages.push({
+          speaker: currentSpeaker,
+          text: currentMessages.join(' ')
+        });
+      }
+
+      // Format the output
+      const formattedText = groupedMessages.map((msg) => {
+        if (msg.speaker) {
+          return `${msg.speaker}: ${msg.text}`;
+        }
+        return msg.text;
+      }).join('\n\n');
+
+      modalBody.textContent = formattedText || 'No transcript content available.';
       copyBtn.disabled = false;
     } catch (error) {
       console.error('Failed to load transcript', error);
